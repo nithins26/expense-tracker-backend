@@ -19,13 +19,21 @@ const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
   .split(",")
   .map((s) => s.trim());
 
+const allowedOriginPatterns = [
+  /^https:\/\/expense-tracker-frontend-[a-z0-9-]+-nithins26s-projects\.vercel\.app$/,
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (Postman, mobile apps)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+      if (
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes("*") ||
+        allowedOriginPatterns.some((pattern) => pattern.test(origin))
+      ) {
         return callback(null, true);
       }
 
@@ -33,6 +41,8 @@ app.use(
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
